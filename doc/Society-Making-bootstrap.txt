@@ -1,0 +1,30 @@
+Bank Society Coin - How to create a bootstrap.dat file
+======================================================
+
+This is really just copying the blk0001.dat to a file named
+bootstrap.dat. However, some coins need to contatinate individual 
+blocks for the complete Bootstrap.
+
+
+Linux 
+cat blk0001.dat > bootstrap.dat
+
+Windows 
+COPY blk0001.dat bootstrap.dat
+
+What do I do with the Bootstrap.dat?
+
+Linux
+-----
+Simple, close your wallet, copy the bootstrap.dat into the 
+/home/<username>/.Society folder
+
+Windows
+-------
+Simple, close your wallet, copy the bootstrap.dat into the 
+user/AppData/Roaming/Society folder 
+
+Restart the wallet, the wallet then synchronises using the 
+Bootsrap file.
+Let the synch complete and the wallet will then start to use 
+netwrk synch.

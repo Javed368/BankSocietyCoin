@@ -1,0 +1,61 @@
+Upgrading your Masternode (LINUX slave wallet)
+
+Update your controller (GUI) wallet to the most recent version first.
+Log into your VPS (Putty)
+
+
+Downloading the source code (Fresh):
+
+Step 1: git clone http://github.com/profithunterscoin/society
+If you get an error (directory exits) then: rm -R society and try git clone again...
+
+
+Downloading the source code (Update):
+
+Step 1: cd society
+Step 2: git pull
+
+
+Compiling the source code:
+
+Step 1: societyd stop
+Step 2: cd society/src
+Step 3: make -f makefile.unix
+Step 4: sudo cp societyd /usr/bin
+Step 5: societyd
+
+
+If your Masternode is stuck on an forked blocks
+
+Step 1: societyd stop
+Step 2: cd .Society
+Step 3: rm blk0001.dat
+Step 4: rm -R txleveldb
+Step 5: wget http://profithunterscoin.com/bootstraps/bootstrap.dat
+Step 6: societyd
+
+
+Restarting your Masternode
+
+Step 1: Wait for your VPS (slave) wallet to fully sync
+Step 2: Close your controller (GUI) wallet if it's running
+Step 3: Restart controller (GUI) wallet and update My Masternodes List once fully synced.
+Step 4: Click Start, then Update button if status doesn't change.
+Step 5: If controller wallet says "Masternode is Running" verify by checking on the VPS (slave) wallet with the command: 
+societyd masternode debug
+It should output "masternode started remotely"
+Logout of your VPS and close your controller wallet (optional)
+
+
+"Could not find suitable coins"
+
+Step 1: Close your controller wallet (GUI) and stop your VPS wallet
+societyd stop
+Step 2: Start societyd on your VPS again and wait a few minutes to sync (10 minutes)
+Step 3: Open your controller wallet again and wait for sync (10 minutes)
+Step 4: In your GUI wallet goto "My Masternodes" click update
+Step 5: Click the Start All button
+Step 6: Go back to your VPS check the debug status: societyd masternode debug
+
+
+

@@ -1,0 +1,16 @@
+Rebooting your Society Masternode:
+
+- Log in to your VPS
+- societyd stop
+- rm .Society/mncache.dat
+- Exit/close your controller wallet (society-qt)
+- remove .mncache.dat from .Society datadir
+- On your VPS restart Society daemon  societyd
+- Reopen society-qt
+- goto Masternodes -> My Masternodes
+- Click Update button
+- Click MN
+- Click Start Button
+- Goto Society Network Tab
+- Wait for your node to show 1 under Active
+- Done! 
