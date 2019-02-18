@@ -11,6 +11,7 @@ This algorithm is intended to discourage >51% attacks, or malicous miners. It wi
 Bank Society Coin supports PoW, PoS (staking) and Masternodes.
 
 Dynamic Block Reward 3.0 (C) 2017 Crypostle
+
 Premine Phase	Block 1 to 100 [COMPLETED]
 
 PoW Phase Start Block 101 to 50000      Reward = 5  SOCI    
