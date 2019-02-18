@@ -12,10 +12,15 @@ Bank Society Coin supports PoW, PoS (staking) and Masternodes.
 
 Dynamic Block Reward 3.0 (C) 2017 Crypostle
 Premine Phase	Block 1 to 100 [COMPLETED]
+
 PoW Phase Start Block 101 to 50000      Reward = 5  SOCI    
+
 PoW Phase  			Block 50001 to 250000   Reward = 25 SOCI  PoS Reward  250%
+
 PoW Phase				Block 250001 to 500000	Reward = 35 SOCI  PoS Reward  360%
+
 PoW ends 750001				                                    PoS Reward  500%							
+
 
 Block Spacing: 60 Seconds (1 minutes)
 Diff Retarget: 2 Blocks
