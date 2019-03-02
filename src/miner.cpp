@@ -211,7 +211,7 @@ CBlock* CreateNewBlockWithKey(CReserveKey& reservekey, CWallet *pwallet)
         LOCK2(cs_main, mempool.cs);
         CTxDB txdb("r");
 
-        //>PHC<
+        //>SOCI<
         // Priority order to process transactions
         list<COrphan> vOrphan; // list memory doesn't move
         map<uint256, vector<COrphan*> > mapDependers;
@@ -435,7 +435,7 @@ CBlock* CreateNewBlockWithKey(CReserveKey& reservekey, CWallet *pwallet)
             LogPrint("miner", "%s : total size %u\n", __FUNCTION__, nBlockSize);
         }
         
-        // >PHC< POW
+        // >SOCI< POW
 
         pblock->vtx[0].vout[0].nValue = GetProofOfWorkReward(pindexPrev->nHeight + 1, nFees);
 
@@ -540,7 +540,7 @@ CBlock* CreateNewBlock(CReserveKey& reservekey, bool fProofOfStake, int64_t* pFe
         LOCK2(cs_main, mempool.cs);
         CTxDB txdb("r");
 
-        //>PHC<
+        //>SOCI<
         // Priority order to process transactions
         list<COrphan> vOrphan; // list memory doesn't move
         map<uint256, vector<COrphan*> > mapDependers;
@@ -764,7 +764,7 @@ CBlock* CreateNewBlock(CReserveKey& reservekey, bool fProofOfStake, int64_t* pFe
             LogPrint("miner", "%s : total size %u\n", __FUNCTION__, nBlockSize);
         }
         
-        // >PHC<
+        // >SOCI<
         
         if (!fProofOfStake)
         {
@@ -940,7 +940,7 @@ void ThreadStakeMiner(CWallet *pwallet)
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
     // Make this thread recognisable as the mining thread
-    RenameThread("PHC-stake-miner");
+    RenameThread("SOCI-stake-miner");
 
     CReserveKey reservekey(pwallet);
 
@@ -1075,17 +1075,17 @@ void static InternalcoinMiner(CWallet *pwallet)
 {
     std::string TempMinerLogCache;
 
-    printf("PHC-PoW-Miner - Started!\n");
+    printf("SOCI-PoW-Miner - Started!\n");
 
 
     if (fDebug)
     {
-        LogPrintf("PHC-PoW-Miner - Started!\n");
+        LogPrintf("SOCI-PoW-Miner - Started!\n");
     }
 
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
-    RenameThread("PHC-PoW-Miner");
+    RenameThread("SOCI-PoW-Miner");
 
     // Each thread has its own key and counter
     CReserveKey reservekey(pwallet);
@@ -1130,12 +1130,12 @@ void static InternalcoinMiner(CWallet *pwallet)
             {
                 if (fDebugConsoleOutputMining)
                 {
-                    printf("Error in PHC-PoW-Miner: Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
+                    printf("Error in SOCI-PoW-Miner: Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
                 }
 
                 if (fDebug)
                 {
-                    LogPrintf("Error in PHC-PoW-Miner: Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
+                    LogPrintf("Error in SOCI-PoW-Miner: Keypool ran out, please call keypoolrefill before restarting the mining thread\n");
                 }
 
                 return;
@@ -1147,12 +1147,12 @@ void static InternalcoinMiner(CWallet *pwallet)
 
             if (fDebugConsoleOutputMining)
             {
-                printf("Running PHC-PoW-Miner with %u transactions in block (%u bytes)\n", (int)pblock->vtx.size(), ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
+                printf("Running SOCI-PoW-Miner with %u transactions in block (%u bytes)\n", (int)pblock->vtx.size(), ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
             }
 
             if (fDebug)
             {
-                LogPrintf("Running PHC-PoW-Miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(), ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
+                LogPrintf("Running SOCI-PoW-Miner with %u transactions in block (%u bytes)\n", pblock->vtx.size(), ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
             }
 
             //
@@ -1184,12 +1184,12 @@ void static InternalcoinMiner(CWallet *pwallet)
                             {
                                 if (fDebugConsoleOutputMining)
                                 {
-                                    printf("PHC-PoW-Miner: Proof-of-work found! (ACCEPTED) POW-Hash: %s Nonce: %d\n", thash.GetHex().c_str(), pblock->nNonce);
+                                    printf("SOCI-PoW-Miner: Proof-of-work found! (ACCEPTED) POW-Hash: %s Nonce: %d\n", thash.GetHex().c_str(), pblock->nNonce);
                                 }
 
                                 if (fDebug)
                                 {
-                                    LogPrintf("PHC-PoW-Miner: Proof-of-work found! (ACCEPTED) POW-Hash: %s Nonce: %d\n", thash.GetHex(), pblock->nNonce);
+                                    LogPrintf("SOCI-PoW-Miner: Proof-of-work found! (ACCEPTED) POW-Hash: %s Nonce: %d\n", thash.GetHex(), pblock->nNonce);
                                 }
                             }
 
@@ -1205,12 +1205,12 @@ void static InternalcoinMiner(CWallet *pwallet)
                             {
                                 if (fDebugConsoleOutputMining)
                                 {
-                                    printf("PHC-PoW-Miner: Proof-of-work found! (REJECTED) POW-Hash: %s Nonce: %d\n", thash.GetHex().c_str(), pblock->nNonce);
+                                    printf("SOCI-PoW-Miner: Proof-of-work found! (REJECTED) POW-Hash: %s Nonce: %d\n", thash.GetHex().c_str(), pblock->nNonce);
                                 }
 
                                 if (fDebug)
                                 {
-                                    LogPrintf("PHC-PoW-Miner: Proof-of-work found! (REJECTED) POW-Hash: %s Nonce: %d\n", thash.GetHex(), pblock->nNonce);
+                                    LogPrintf("SOCI-PoW-Miner: Proof-of-work found! (REJECTED) POW-Hash: %s Nonce: %d\n", thash.GetHex(), pblock->nNonce);
                                 }
                             }
 
@@ -1270,12 +1270,12 @@ void static InternalcoinMiner(CWallet *pwallet)
 
                                 if (fDebugConsoleOutputMining)
                                 {
-                                    printf("PHC-PoW-Miner: Hashmeter %6.0f khash/s\n", dHashesPerSec/1000.0);
+                                    printf("SOCI-PoW-Miner: Hashmeter %6.0f khash/s\n", dHashesPerSec/1000.0);
                                 }
 
                                 if (fDebug)
                                 {
-                                    LogPrintf("PHC-PoW-Miner: Hashmeter %6.0f khash/s\n", dHashesPerSec/1000.0);
+                                    LogPrintf("SOCI-PoW-Miner: Hashmeter %6.0f khash/s\n", dHashesPerSec/1000.0);
                                 }
                             }
                         }
@@ -1321,22 +1321,22 @@ void static InternalcoinMiner(CWallet *pwallet)
     }
     catch (boost::thread_interrupted)
     {
-        printf("PHC-PoW-Miner terminated\n");
+        printf("SOCI-PoW-Miner terminated\n");
 
         if (fDebug)
         {
-            LogPrintf("PHC-PoW-Miner terminated\n");
+            LogPrintf("SOCI-PoW-Miner terminated\n");
         }
 
         throw;
     }
     catch (const std::runtime_error &e)
     {
-        printf("PHC-PoW-Miner runtime error: %s\n", e.what());
+        printf("SOCI-PoW-Miner runtime error: %s\n", e.what());
 
         if (fDebug)
         {
-            LogPrintf("PHC-PoW-Miner runtime error: %s\n", e.what());
+            LogPrintf("SOCI-PoW-Miner runtime error: %s\n", e.what());
         }
 
         return;

@@ -236,6 +236,8 @@ Value getstakinginfo(const Array& params, bool fHelp)
                             "Returns an object containing staking-related information.");
     }
 
+    LogPrintf("*** RGP : rpcmining, getstakinginfo \n");
+
     uint64_t nWeight = 0;
     uint64_t nExpectedTime = 0;
     
@@ -289,12 +291,12 @@ Value checkkernel(const Array& params, bool fHelp)
 
     if (vNodes.empty())
     {
-        throw JSONRPCError(-9, "PHC is not connected!");
+        throw JSONRPCError(-9, "Society is not connected!");
     }
 
     if (IsInitialBlockDownload())
     {
-        throw JSONRPCError(-10, "PHC is downloading blocks...");
+        throw JSONRPCError(-10, "Society is downloading blocks...");
     }
 
     COutPoint kernel;
@@ -401,12 +403,12 @@ Value getworkex(const Array& params, bool fHelp)
 
     if (vNodes.empty())
     {
-        throw JSONRPCError(-9, "PHC is not connected!");
+        throw JSONRPCError(-9, "Society is not connected!");
     }
 
     if (IsInitialBlockDownload())
     {
-        throw JSONRPCError(-10, "PHC is downloading blocks...");
+        throw JSONRPCError(-10, "Society is downloading blocks...");
     }
 
     if (pindexBest->nHeight >= Params().LastPOWBlock())
@@ -564,12 +566,12 @@ Value getwork(const Array& params, bool fHelp)
 
     if (vNodes.empty())
     {
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "PHC is not connected!");
+        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Society is not connected!");
     }
 
     if (IsInitialBlockDownload())
     {
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "PHC is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Society is downloading blocks...");
     }
 
     if (pindexBest->nHeight >= Params().LastPOWBlock())
@@ -752,12 +754,12 @@ Value getblocktemplate(const Array& params, bool fHelp)
 
     if (vNodes.empty())
     {
-        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "PHC is not connected!");
+        throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Society is not connected!");
     }
 
     if (IsInitialBlockDownload())
     {
-        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "PHC is downloading blocks...");
+        throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Society is downloading blocks...");
     }
 
     if (pindexBest->nHeight >= Params().LastPOWBlock())
