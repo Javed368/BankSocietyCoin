@@ -1,4 +1,4 @@
-
+﻿
 Bank Society Coin Masternode Install Guide - Setup Guide (Single VPS/IP)
 ========================================================================
 
@@ -110,11 +110,15 @@ Output: 0
 
 Click "OK" now open up an SSH client Putty
 
-Step #6:
+============
+== STEP 6 ==
+============
 
 Register & Log in to your Linux VPS as root. Ubuntu or Debian is recommended.
 
-Step #7: [VPS/Putty]
+============
+== STEP 7 == [VPS/Putty]
+============ 
 
 Install the required wallet dependencies:
 
@@ -160,7 +164,9 @@ Download and manually compile Berkley DB 5+ (If DB 4.8 won't install or compile)
 
 apt-get install libdb-dev libdb++-dev
 
-Step #8: [VPS/Putty]
+============
+== STEP 8 == [VPS/Putty]
+============ 
 
 Create Swap Space:
 
@@ -175,22 +181,26 @@ cat /proc/meminfo
 
 If you get an error: "operation not permitted" please see here for a possible fix.
 
-Step #9: [VPS/Putty]
+============
+== STEP 9 == [VPS/Putty]
+============ 
 
 Build & compile the slave wallet binary:
 
-git clone https://github.com/profithunterscoin/phc
-cd phc/src
+git clone https://github.com/RGPickles/BankSocietyCoin
+cd BankSocietyCoin/src
 make -f makefile.unix
-cp phcd /usr/bin
+cp societyd /usr/bin
 cd ..
 
-Step #10: [VPS/Putty]
+=============
+== STEP 10 == [VPS/Putty]
+============= 
 
 Create your configuration File:
 
 mkdir /root/.Society
-nano /root/.Siciety/society.conf
+nano /root/.Society/society.conf
 
 Copy and paste the following (Slave wallet only):
 
@@ -218,7 +228,9 @@ Save and exit (CTRL + X):
 
 Press: Y then ENTER to overwrite.
 
-Step #12: [VPS/Putty]
+=============
+== STEP 11 == [VPS/Putty]
+============= 
 
 Start your slave wallet:
 
@@ -232,7 +244,22 @@ Wait until full sync - try the above commands periodically to view the progress:
 
 If you close Putty and societyd exits too: Install screen (apt-get install screen) and run it using: screen societyd
 
-Step #13: [VPS/Putty]
+=============
+== STEP 12 == [VPS/Putty]
+============= 
+
+
+=============
+== STEP 13 == [VPS/Putty]
+============= 
+
+Perform the following command to ensure that your wallet can access the Masternode on the VPS
+
+sudo ufw allow 23960 
+
+=============
+== STEP 14 == [WALLET]
+============= 
 
 Remote Start your masternode:
 
