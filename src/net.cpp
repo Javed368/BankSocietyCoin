@@ -372,10 +372,11 @@ bool CheckBlackList(CNode *pnode)
     int TmpBlackListCount;
     TmpBlackListCount = CountStringArray(FIREWALL_BLACKLIST);
 
-    LogPrintf("*** RGP CheckBlackList Debug, listing \n ");
 
-    for (i = 0; i < TmpBlackListCount; i++) {
-       LogPrintf("*** RGP CheckBlackList Debug, BANNED %s \n ", FIREWALL_BLACKLIST[i] );
+    if ( fDebug ){
+       for ( i = 0; i < TmpBlackListCount; i++) {
+           LogPrintf("*** RGP CheckBlackList Debug, BANNED %s \n ", FIREWALL_BLACKLIST[i] );
+       }
     }
 
     if (TmpBlackListCount > 0) {
@@ -399,9 +400,6 @@ bool CheckBanned(CNode *pnode)
 
     if ( CNode::IsBanned( pnode->addr ) == true ) {
          // Yes Banned!
-
-         LogPrintf("*** RGP CheckBanned Debug, IPaddress %s BANNED \n ", pnode->addr.ToString() );
-
 
          return true;
     }
@@ -1313,7 +1311,7 @@ bool RecvLine(SOCKET hSocket, string& strLine)
                     continue;
                 if (nErr == WSAEWOULDBLOCK || nErr == WSAEINTR || nErr == WSAEINPROGRESS)
                 {
-                    MilliSleep(50);
+                    MilliSleep(100); //50
                     continue;
                 }
             }
@@ -1389,8 +1387,6 @@ bool AddLocal(const CService& addr, int nScore)
 
     if (IsLimited(addr))
         return false;
-
-    LogPrintf("AddLocal(%s,%i)\n", addr.ToString(), nScore);
 
     {
         LOCK(cs_mapLocalHost);
@@ -1540,7 +1536,9 @@ bool CheckNode(CAddress addrConnect)
 */        
         return true;
     }
-    LogPrint("net", "connecting to masternode %s failed\n", addrConnect.ToString());
+    if ( fDebug ){
+       LogPrint("net", "connecting to masternode %s failed\n", addrConnect.ToString());
+    }
     return false;
 }
 
@@ -1548,11 +1546,9 @@ bool CheckNode(CAddress addrConnect)
 CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool darkSendMaster)
 {
 
-    LogPrintf("*** RGP ConnectNode %s \n", addrConnect.ToString());
     if (pszDest == NULL) {
         if (IsLocal(addrConnect)){
-            LogPrintf("*** RGP ConnectNode is LOCAL \n");
-            return NULL;
+           return NULL;
         }
 
         // Look for an existing connection
@@ -1566,8 +1562,6 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, bool darkSendMaste
             return pnode;
         }
     }
-
-LogPrintf("*** RGP ConnectNode next connect socket \n");
 
 
     /// debug print
@@ -1661,7 +1655,7 @@ void CNode::ClearBanned()
 bool CNode::IsBanned(CNetAddr ip)
 {
     bool fResult = false;
-    bool nodestatus;
+    //bool nodestatus;          UNUSED?
 
     {
         LOCK(cs_setBanned);
@@ -1680,7 +1674,7 @@ bool CNode::IsBanned(CNetAddr ip)
 bool CNode::IsBanned(CSubNet subnet)
 {
     bool fResult = false;
-    bool tester;
+    //bool tester;              UNUSED
 
     {
         LOCK(cs_setBanned);
@@ -1951,13 +1945,17 @@ return;
             if (!adb.Read(addrman))
                 LogPrintf("Invalid or missing peers.dat; recreating\n");
         }
-            
-        LogPrintf("Loaded %i addresses from peers.dat  %dms\n",
-        addrman.size(), GetTimeMillis() - nStart);
+
+        if ( fDebug ){
+            LogPrintf("Loaded %i addresses from peers.dat  %dms\n", addrman.size(), GetTimeMillis() - nStart);
+        }
 
         const vector<CDNSSeedData> &vSeeds = Params().DNSSeeds();
         int found = 0;
+
+        if ( fDebug ){
             LogPrintf("Loading addresses from DNS seeds (could take a while)\n");
+        }
 
             BOOST_FOREACH(const CDNSSeedData &seed, vSeeds) {
                 if (HaveNameProxy()) {
@@ -1982,7 +1980,9 @@ return;
                 }
             }
 
-            LogPrintf("%d addresses found from DNS seeds\n", found);
+            if ( fDebug ){
+                LogPrintf("%d addresses found from DNS seeds\n", found);
+            }
 
             //DumpAddresses();
 
@@ -2072,8 +2072,10 @@ void SocketSendData(CNode *pnode)
                 it++;
             } else {
                 // could not send full message; stop sending more
-                LogPrintf("socket send error: interruption\n");
 
+                if ( fDebug ){
+                    LogPrintf("socket send error: interruption\n");
+                }
 
                     // Disconnect node/peer if send/recv data becomes idle
                     if (GetTime() - pnode->nTimeConnected > 60)
@@ -2082,7 +2084,9 @@ void SocketSendData(CNode *pnode)
                         {
                             if (GetTime() - pnode->nLastSend < 60)
                             {
-                                LogPrintf("Error: Unexpected idle interruption %s\n", pnode->addrName);
+                                if ( fDebug ){
+                                    LogPrintf("Error: Unexpected idle interruption %s\n", pnode->addrName);
+                                }
                                 pnode->CloseSocketDisconnect();
                             }
                         }
@@ -2097,7 +2101,9 @@ void SocketSendData(CNode *pnode)
                 int nErr = WSAGetLastError();
                 if (nErr != WSAEWOULDBLOCK && nErr != WSAEMSGSIZE && nErr != WSAEINTR && nErr != WSAEINPROGRESS)
                 {
-                    LogPrintf("socket send error %d socket %ld  \n", nErr, pnode->hSocket);
+                    if ( fDebug ){
+                        LogPrintf("socket send error %d socket %ld  \n", nErr, pnode->hSocket);
+                    }
 
                     // Disconnect node/peer if send/recv data becomes idle
                     if (GetTime() - pnode->nTimeConnected > 90)
@@ -2106,7 +2112,9 @@ void SocketSendData(CNode *pnode)
                         {
                             if (GetTime() - pnode->nLastSend < 30)
                             {
-                                LogPrintf("Error: Unexpected idle interruption %s\n", pnode->addrName);
+                                if ( fDebug ){
+                                    LogPrintf("Error: Unexpected idle interruption %s\n", pnode->addrName);
+                                }
                                 pnode->CloseSocketDisconnect();
                             }
                         }
@@ -2115,22 +2123,28 @@ void SocketSendData(CNode *pnode)
                 }
             }
             // couldn't send anything at all
-            LogPrintf("socket send error: data failure socket %ld  \n", pnode->hSocket );
+            if ( fDebug ){
+                LogPrintf("socket send error: data failure socket %ld  \n", pnode->hSocket );
+            }
 
-                // Disconnect node/peer if send/recv data becomes idle
-                    if (GetTime() - pnode->nTimeConnected > 90)
+
+            // Disconnect node/peer if send/recv data becomes idle
+            if (GetTime() - pnode->nTimeConnected > 90)
+            {
+                if (GetTime() - pnode->nLastRecv > 60)
+                {
+                    if (GetTime() - pnode->nLastSend < 30)
                     {
-                        if (GetTime() - pnode->nLastRecv > 60)
-                        {
-                            if (GetTime() - pnode->nLastSend < 30)
-                            {
-                                LogPrintf("Error: Unexpected idle interruption %s\n", pnode->addrName);
-                                pnode->CloseSocketDisconnect();
-                            }
+                        if ( fDebug ){
+                            LogPrintf("Error: Unexpected idle interruption %s\n", pnode->addrName);
                         }
+                        pnode->CloseSocketDisconnect();
                     }
+                }
+            }
 
             break;
+
         }
     }
 
@@ -2146,6 +2160,11 @@ static list<CNode*> vNodesDisconnected;
 void ThreadSocketHandler()
 {
     unsigned int nPrevNodeCount = 0;
+    int nErr;
+    bool nodestatus;
+    string ipAnalysis;
+    string portinfo;
+
     while (true)
     {
         //
@@ -2283,11 +2302,16 @@ void ThreadSocketHandler()
         {
             if (have_fds)
             {
-                int nErr = WSAGetLastError();
-                LogPrintf("socket select error %d\n", nErr);
+                nErr = WSAGetLastError();
+
+                if ( fDebug ){
+                    LogPrintf("socket select error %d\n", nErr);
+                }
+
                 for (unsigned int i = 0; i <= hSocketMax; i++)
                     FD_SET(i, &fdsetRecv);
             }
+
             FD_ZERO(&fdsetSend);
             FD_ZERO(&fdsetError);
             MilliSleep(timeout.tv_usec/1000);
@@ -2305,9 +2329,6 @@ void ThreadSocketHandler()
             SOCKET hSocket = accept(hListenSocket, (struct sockaddr*)&sockaddr, &len);
             CAddress addr;
             int nInbound = 0;
-
-
-
 
             if (hSocket != INVALID_SOCKET)
                 if (!addr.SetSockAddr((const struct sockaddr*)&sockaddr))
@@ -2333,18 +2354,22 @@ void ThreadSocketHandler()
             }
             else if (CNode::IsBanned(addr))
             {
-                /* RGP */
-                string ipAnalysis;
-                bool nodestatus;
-                string portinfo;
+                /* RGP, Added some monitoring code, as low volume connections
+                   at the start of the project was causing many bans to occur.
+                   Once traffic improved there were no bans, will look at this in the
+                   future if this happens again during the life of the coin.
+                   Removed all BANNING code for now.                                      */
+
+
+                nodestatus = false ;
 
                 ipAnalysis = addr.ToStringIP();
                 portinfo   = addr.ToStringPort();
 
-                LogPrintf("*** RGP Port is %s \n", portinfo );
-
                 if ( portinfo == "23960" ) {
-                    LogPrintf("*** RGP UNBANNED analise %s \n", ipAnalysis  );
+                    if ( fDebug ){
+                        LogPrintf("*** RGP UNBANNED analise %s \n", ipAnalysis  );
+                    }
                     nodestatus = CNode::Unban( addr );
                     /* Do not close the socket */
 
@@ -2352,16 +2377,13 @@ void ThreadSocketHandler()
                     //    CSubNet subNet(addr.ToString()+(addr.IsIPv4() ? "/32" : "/128"));
                     //    return Unban(subNet);
                    // }
-//CNode::IsBanned(addr)
+                   //CNode::IsBanned(addr)
 
                 }
                 else
                 {
-                    bool nodestatus;
-                    string portinfo;
                     portinfo   = addr.ToStringPort();
 
-                    LogPrintf("*** RGP Port is %s \n", portinfo );
 
                     /* UNBANN for now until rectified */
                     nodestatus = CNode::Unban( addr );
@@ -2371,19 +2393,13 @@ void ThreadSocketHandler()
 
                     } else {
 
-                        LogPrintf("*** RGP still banned analise %s \n", ipAnalysis  );
-                        LogPrintf("connection from %s dropped (banned)\n", addr.ToString());
+                        if ( fDebug ){
+                            LogPrintf("connection from %s dropped (banned)\n", addr.ToString());
+                        }
                         //closesocket(hSocket);
 
                     }
-
-
-
-
                 }
-
-
-
             }
             else
             {
@@ -2745,7 +2761,7 @@ void ThreadOpenConnections()
                     MilliSleep(1000); //500
                 }
             }
-            MilliSleep(100);
+            MilliSleep(200); //100
         }
     }
 
@@ -2755,7 +2771,7 @@ void ThreadOpenConnections()
     {
         ProcessOneShot();
 
-        MilliSleep(1000);// 500
+        MilliSleep(200);// 500
 
         CSemaphoreGrant grant(*semOutbound);
         boost::this_thread::interruption_point();
@@ -2847,7 +2863,7 @@ void ThreadOpenAddedConnections()
                 CAddress addr;
                 CSemaphoreGrant grant(*semOutbound);
                 OpenNetworkConnection(addr, &grant, strAddNode.c_str());
-                MilliSleep(1000);//500
+                MilliSleep(500);//500
             }
             MilliSleep(120000); // Retry every 2 minutes
         }
@@ -2894,7 +2910,7 @@ void ThreadOpenAddedConnections()
         {
             CSemaphoreGrant grant(*semOutbound);
             OpenNetworkConnection(CAddress(vserv[i % vserv.size()]), &grant);
-            MilliSleep(1000);//500
+            MilliSleep(500);//500
         }
         MilliSleep(120000); // Retry every 2 minutes
     }
@@ -2907,20 +2923,16 @@ bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOu
     // Initiate outbound network connection
     //
 
-    LogPrintf("*** RGP OpenNetworkConnection start \n");
-
     boost::this_thread::interruption_point();
     if (!strDest)
         if (IsLocal(addrConnect) ||
             FindNode((CNetAddr)addrConnect) || CNode::IsBanned(addrConnect) ||
                 FindNode(addrConnect.ToStringIPPort().c_str())){
 
-            LogPrintf("*** RGP OpenNetworkConnections failed node %s \n", FindNode(addrConnect.ToStringIPPort().c_str() ) );
             return false;
         }
 
     if (strDest && FindNode(strDest)){
-        LogPrintf("*** RGP OpenNetworkConnections failed dEST AND NODE DEST ARE DIFFERENT  \n" );
         return false;
     }
 
@@ -2928,11 +2940,9 @@ bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOu
     boost::this_thread::interruption_point();
 
     if (!pnode){
-        LogPrintf("*** RGP OpenNetworkConnection pnode check failed \n");
         return false;
     }
 
-    LogPrintf("*** RGP OpenNetworkConnection Firewall check \n");
 
     if (FireWall(pnode, "OpenNetConnection"))
     {
@@ -3084,7 +3094,7 @@ void ThreadMessageHandler()
         }
 
         if (fSleep) {
-            MilliSleep(100); // RGP was MilliSleep(100);
+            MilliSleep(200); // RGP was MilliSleep(100);
         }
     }
 }
@@ -3258,7 +3268,6 @@ void static Discover(boost::thread_group& threadGroup)
 void StartNode(boost::thread_group& threadGroup)
 {
 
-    LogPrintf("*** RGP StartNode start \n");
     //try to read stored banlist
     CBanDB bandb;
     banmap_t banmap;

@@ -46,7 +46,7 @@ void CActiveMasternode::ManageStatus()
 
         LogPrintf("CActiveMasternode::ManageStatus() - Checking inbound connection to '%s'\n", service.ToString().c_str());
 
-            /* SocietyNOTE: There is no logical reason to restrict this to a specific port.  Its a peer, what difference does it make.
+            /* Society NOTE: There is no logical reason to restrict this to a specific port.  Its a peer, what difference does it make.
             if(!ConnectNode((CAddress)service, service.ToString().c_str())){
                 notCapableReason = "Could not connect to " + service.ToString();
                 status = MASTERNODE_NOT_CAPABLE;
@@ -123,7 +123,7 @@ void CActiveMasternode::ManageStatus()
 
     //send to all peers
     if(!Dseep(errorMessage)) {
-    	LogPrintf("CActiveMasternode::ManageStatus() - Error on Ping: %s\n", errorMessage.c_str());
+        LogPrintf("CActiveMasternode::ManageStatus() - Error on Ping: %s\n", errorMessage.c_str());
     }
 }
 
@@ -149,7 +149,7 @@ bool CActiveMasternode::StopMasterNode(std::string strService, std::string strKe
 bool CActiveMasternode::StopMasterNode(std::string& errorMessage) {
 	if(status != MASTERNODE_IS_CAPABLE && status != MASTERNODE_REMOTELY_ENABLED) {
 		errorMessage = "masternode is not in a running status";
-    	LogPrintf("CActiveMasternode::StopMasterNode() - Error: %s\n", errorMessage.c_str());
+        LogPrintf("CActiveMasternode::StopMasterNode() - Error: %s\n", errorMessage.c_str());
 		return false;
 	}
 
@@ -160,7 +160,7 @@ bool CActiveMasternode::StopMasterNode(std::string& errorMessage) {
 
     if(!darkSendSigner.SetKey(strMasterNodePrivKey, errorMessage, keyMasternode, pubKeyMasternode))
     {
-    	LogPrintf("Register::ManageStatus() - Error upon calling SetKey: %s\n", errorMessage.c_str());
+        LogPrintf("Register::ManageStatus() - Error upon calling SetKey: %s\n", errorMessage.c_str());
     	return false;
     }
 
@@ -376,6 +376,8 @@ bool CActiveMasternode::GetMasterNodeVinForPubKey(std::string collateralAddress,
     // Find possible candidates
     vector<COutput> possibleCoins = SelectCoinsMasternodeForPubKey(collateralAddress);
     COutput *selectedOutput;
+
+    LogPrintf("\n *** RGP GetMasterNodeVinForPubKey address %s \n", collateralAddress );
 
     // Find the vin
 	if(!strTxHash.empty()) {

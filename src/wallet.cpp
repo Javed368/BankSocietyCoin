@@ -686,8 +686,9 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn, bool fFromLoadWallet)
             fUpdated |= wtx.UpdateSpent(wtxIn.vfSpent);
         }
 
-        //// debug print
-        LogPrintf("AddToWallet %s  %s%s\n", wtxIn.GetHash().ToString(), (fInsertedNew ? "new" : ""), (fUpdated ? "update" : ""));
+        if ( fDebug ){
+            LogPrintf("AddToWallet %s  %s%s\n", wtxIn.GetHash().ToString(), (fInsertedNew ? "new" : ""), (fUpdated ? "update" : ""));
+        }
 
         // Write to disk
         if (fInsertedNew || fUpdated)
@@ -1214,6 +1215,7 @@ void CWallet::ReacceptWalletTransactions()
             {
                 // Try to add to memory pool
                 LOCK(mempool.cs);
+
                 wtx.AcceptToMemoryPool(false);
             }
             if ((wtx.IsCoinBase() && wtx.IsSpent(0)) || (wtx.IsCoinStake() && wtx.IsSpent(1)))
@@ -3552,7 +3554,9 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         ExtractDestination(payee, address1);
         CSocietycoinAddress address2(address1);
 
-        LogPrintf("Masternode payment to %s\n", address2.ToString().c_str());
+        if ( fDebug ){
+            LogPrintf("Masternode payment to %s\n", address2.ToString().c_str());
+        }
     }
 
     // If reward percent is 100 then send all to reward address
@@ -3567,7 +3571,9 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         ExtractDestination(payeerewardaddress, address1);
         CSocietycoinAddress address2(address1);
 
-        LogPrintf("Masternode payment to %s\n", address2.ToString().c_str());
+        if (fDebug ){
+            LogPrintf("Masternode payment to %s\n", address2.ToString().c_str());
+        }
     }
 
     // If reward percent more than 0 and lower than 100 then split reward
@@ -3589,7 +3595,9 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         ExtractDestination(payeerewardaddress, address3);
         CSocietycoinAddress address4(address3);
 
-        LogPrintf("Masternode payment to %s\n", address2.ToString().c_str());
+        if ( fDebug ){
+            LogPrintf("Masternode payment to %s\n", address2.ToString().c_str());
+        }
     }
     
     int64_t blockValue = nCredit;
@@ -3695,6 +3703,7 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey, std:
             LogPrintf("CommitTransaction() : Error: Transaction not valid\n");
             return false;
         }
+
         wtxNew.RelayWalletTransaction(strCommand);
     }
     return true;
@@ -4119,7 +4128,10 @@ void CWallet::KeepKey(int64_t nIndex)
         CWalletDB walletdb(strWalletFile);
         walletdb.ErasePool(nIndex);
     }
-    LogPrintf("keypool keep %d\n", nIndex);
+
+    if ( fDebug ){
+        LogPrintf("keypool keep %d\n", nIndex);
+    }
 }
 
 void CWallet::ReturnKey(int64_t nIndex)
@@ -4129,7 +4141,10 @@ void CWallet::ReturnKey(int64_t nIndex)
         LOCK(cs_wallet);
         setKeyPool.insert(nIndex);
     }
-    LogPrintf("keypool return %d\n", nIndex);
+
+    if ( fDebug ){
+        LogPrintf("keypool return %d\n", nIndex);
+    }
 }
 
 bool CWallet::GetKeyFromPool(CPubKey& result)

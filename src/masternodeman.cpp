@@ -439,12 +439,8 @@ CMasternode* CMasternodeMan::GetCurrentMasterNode(int mod, int64_t nBlockHeight,
     // scan for winner
     BOOST_FOREACH(CMasternode& mn, vMasternodes) {
 
-        LogPrintf("*** RGP CMasternodeMan::GetCurrentMasterNode looking at Masternode list \n");
-
         mn.Check();
         if(mn.protocolVersion < minProtocol || !mn.IsEnabled()) continue;
-
-        LogPrintf("*** RGP GetCurrentMasterNode mn protocolVersion %ld %ld \n", mn.protocolVersion , minProtocol );
 
         // calculate the score for each masternode
         uint256 n = mn.CalculateScore(mod, nBlockHeight);

@@ -741,6 +741,7 @@ public:
 
 void JSONRequest::parse(const Value& valRequest)
 {
+
     // Parse request
     if (valRequest.type() != obj_type)
         throw JSONRPCError(RPC_INVALID_REQUEST, "Invalid Request object");
@@ -767,6 +768,7 @@ void JSONRequest::parse(const Value& valRequest)
         params = Array();
     else
         throw JSONRPCError(RPC_INVALID_REQUEST, "Params must be an array");
+
 }
 
 
@@ -777,6 +779,7 @@ static Object JSONRPCExecOne(const Value& req)
     JSONRequest jreq;
     try {
         jreq.parse(req);
+
 
         Value result = tableRPC.execute(jreq.strMethod, jreq.params);
         rpc_result = JSONRPCReplyObj(result, Value::null, jreq.id);

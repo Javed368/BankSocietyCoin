@@ -144,11 +144,8 @@ uint64_t CMasternodePayments::CalculateScore(uint256 blockHash, CTxIn& vin)
 
 bool CMasternodePayments::GetBlockPayee(int nBlockHeight, CScript& payee, CTxIn& vin)
 {
-    LogPrintf("*** RGP CMasternodePayments::GetBlockPayee Start blockheight %ld \n", nBlockHeight );
 
     BOOST_FOREACH( CMasternodePaymentWinner& winner, vWinning ){
-
-        LogPrintf("*** RGP FOR Loop \n");
 
         if(winner.nBlockHeight == nBlockHeight) {
             payee = winner.payee;
@@ -156,8 +153,6 @@ bool CMasternodePayments::GetBlockPayee(int nBlockHeight, CScript& payee, CTxIn&
             return true;
         }
     }
-
-    LogPrintf("*** RGP CMasternodePayments::GetBlockPayee end \n");
 
     return false;
 }

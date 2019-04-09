@@ -137,12 +137,13 @@ cout << "JImmy \n" << pszTimestamp << endl;
 
         hashGenesisBlock = genesis.GetHash();
 
-        cout << "mainnet.genesis : \n" << genesis.ToString() << endl;
-        cout << "mainnet.genesis.GetHash(): " << genesis.GetHash().ToString() << endl;
-        cout << "mainnet.genesis.hashMerkleRoot: " << genesis.hashMerkleRoot.ToString() << endl;
-        cout << "mainnet.genesis.nTime: " << genesis.nTime << endl;
-        cout << "mainnet.genesis.nNonce: " << genesis.nNonce << endl;
-       
+        if ( fDebug ){
+            cout << "mainnet.genesis : \n" << genesis.ToString() << endl;
+            cout << "mainnet.genesis.GetHash(): " << genesis.GetHash().ToString() << endl;
+            cout << "mainnet.genesis.hashMerkleRoot: " << genesis.hashMerkleRoot.ToString() << endl;
+            cout << "mainnet.genesis.nTime: " << genesis.nTime << endl;
+            cout << "mainnet.genesis.nNonce: " << genesis.nNonce << endl;
+        }
 		/* end of Merkle root segment */
        
         hashGenesisBlock = genesis.GetHash();

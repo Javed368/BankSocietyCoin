@@ -236,8 +236,6 @@ Value getstakinginfo(const Array& params, bool fHelp)
                             "Returns an object containing staking-related information.");
     }
 
-    LogPrintf("*** RGP : rpcmining, getstakinginfo \n");
-
     uint64_t nWeight = 0;
     uint64_t nExpectedTime = 0;
     
@@ -394,6 +392,7 @@ Value checkkernel(const Array& params, bool fHelp)
 
 Value getworkex(const Array& params, bool fHelp)
 {
+
     if (fHelp || params.size() > 2)
     {
         throw runtime_error("getworkex [data, coinbase]\n"
@@ -551,10 +550,12 @@ Value getworkex(const Array& params, bool fHelp)
 }
 
 
-Value getwork(const Array& params, bool fHelp)
+Value getwork(const Array &params, bool fHelp)
 {
+
     if (fHelp || params.size() > 1)
     {
+
         throw runtime_error("getwork [data]\n"
                             "If [data] is not specified, returns formatted hash data to work on:\n"
                             "  \"midstate\" : precomputed hash state after hashing the first half of the data (DEPRECATED)\n" // deprecated
@@ -566,16 +567,19 @@ Value getwork(const Array& params, bool fHelp)
 
     if (vNodes.empty())
     {
+
         throw JSONRPCError(RPC_CLIENT_NOT_CONNECTED, "Society is not connected!");
     }
 
     if (IsInitialBlockDownload())
     {
+
         throw JSONRPCError(RPC_CLIENT_IN_INITIAL_DOWNLOAD, "Society is downloading blocks...");
     }
 
     if (pindexBest->nHeight >= Params().LastPOWBlock())
     {
+
         throw JSONRPCError(RPC_MISC_ERROR, "No more PoW blocks");
     }
 
@@ -586,16 +590,19 @@ Value getwork(const Array& params, bool fHelp)
 
     if (params.size() == 0)
     {
+
         // Update block
         static unsigned int nTransactionsUpdatedLast;
         static CBlockIndex* pindexPrev;
         static int64_t nStart;
         static CBlock* pblock;
-        
+
         if (pindexPrev != pindexBest || (mempool.GetTransactionsUpdated() != nTransactionsUpdatedLast && GetTime() - nStart > 60))
         {
+
             if (pindexPrev != pindexBest)
             {
+
                 // Deallocate old blocks since they're obsolete now
                 mapNewBlock.clear();
                 
@@ -620,6 +627,7 @@ Value getwork(const Array& params, bool fHelp)
 
             if (!pblock)
             {
+
                 throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
             }
             
@@ -628,6 +636,7 @@ Value getwork(const Array& params, bool fHelp)
             // Need to update only after we know CreateNewBlock succeeded
             pindexPrev = pindexPrevNew;
         }
+
 
         // Update nTime
         pblock->UpdateTime(pindexPrev);
@@ -659,11 +668,13 @@ Value getwork(const Array& params, bool fHelp)
     }
     else
     {
+
         // Parse parameters
         vector<unsigned char> vchData = ParseHex(params[0].get_str());
         
         if (vchData.size() != 128)
         {
+
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
         }
         
@@ -678,6 +689,7 @@ Value getwork(const Array& params, bool fHelp)
         // Get saved block
         if (!mapNewBlock.count(pdata->hashMerkleRoot))
         {
+
             return false;
         }
         

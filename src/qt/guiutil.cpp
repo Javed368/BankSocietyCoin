@@ -745,7 +745,7 @@ void HelpMessageBox::showOrPrint()
 void SetBlackThemeQSS(QApplication& app)
 {
     app.setStyleSheet("QWidget        { background: rgb(41,44,48); }"
-                      "QFrame         { border: none; background:url(:/images/bkg)}"
+                      "QFrame         { border: none; background:url(:/images/bkg-dark.png)}"
                       "QComboBox      { color: rgb(255,255,255); }"
                       "QComboBox QAbstractItemView::item { color: rgb(255,255,255); }"
                       "QPushButton    { background: rgb(226,189,121); color: rgb(21,21,21); }"

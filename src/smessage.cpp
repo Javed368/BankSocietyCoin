@@ -582,9 +582,6 @@ void ThreadSecureMsg()
     uint32_t nLoop = 0;
     std::vector<std::pair<int64_t, NodeId> > vTimedOutLocks;
 
-
-    LogPrintf("*** RGP *** ThreadSecureMsg start... Debug 001\n" );
-
     while (fSecMsgEnabled)
     {
         nLoop++;
@@ -601,8 +598,7 @@ void ThreadSecureMsg()
             
             for (std::map<int64_t, SecMsgBucket>::iterator it(smsgBuckets.begin()); it != smsgBuckets.end(); it++)
             {
-                //if (fDebugSmsg)
-                //    LogPrint("smessage", "Checking bucket %d", size %u \n", it->first, it->second.setTokens.size());
+
                 if (it->first < cutoffTime)
                 {
                     if (fDebugSmsg)
@@ -698,8 +694,6 @@ void ThreadSecureMsgPow()
     std::string sPrefix("qm");
     uint8_t chKey[18];
 
-    //LogPrintf("*** RGP >>> ThreadSecureMsgPow start... Debug 001\n" );
-
     while (fSecMsgEnabled)
     {
         // -- sleep at end, then fSecMsgEnabled is tested on wake
@@ -710,7 +704,7 @@ void ThreadSecureMsgPow()
             LOCK(cs_smsgDB);
 
             if (!dbOutbox.Open("cr+")){
-                MilliSleep(2);// RGP added, modified was 200
+                MilliSleep(20); // RGP added, modified was 200
                 continue;
             }
             // -- fifo (smallest key first)
@@ -724,8 +718,7 @@ void ThreadSecureMsgPow()
             {
                 LOCK(cs_smsgDB);
                 if (!dbOutbox.NextSmesg(it, sPrefix, chKey, smsgStored)){
-                    //LogPrintf("*** RGP*** ThreadSecureMsgPow No Next Messagee... Debug 001a\n" );
-                    MilliSleep(2); // RGP added, was 10
+                    MilliSleep(10); // RGP added, was 10
                     break;
                 }
             }
@@ -769,13 +762,13 @@ void ThreadSecureMsgPow()
             };
 
             /* RGP, Added as smsg-po was using 100% cpu time? */
-            //MilliSleep(20);
+            MilliSleep(5); // was 1
         };
 
         delete it;
 
         // -- shutdown thread waits 5 seconds, this should be less
-        //MilliSleep(20); // seconds
+        MilliSleep(2000); // seconds
     };
 };
 
@@ -1183,8 +1176,6 @@ bool SecureMsgShutdown()
 
 bool SecureMsgEnable()
 {
-
-      LogPrintf("*** RGP*** SecureMsgEnable start... Debug 001\n" );
 
     // -- start secure messaging at runtime
     if (fSecMsgEnabled)

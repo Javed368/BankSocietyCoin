@@ -879,9 +879,6 @@ bool AppInit2(boost::thread_group& threadGroup)
         }
 
 
-        LogPrintf("*** RGP*** APInit2 Loading wallet Debug 2\n" );
-
-
         if (GetBoolArg("-upgradewallet", fFirstRun))
         {
             int nMaxVersion = GetArg("-upgradewallet", 0);
@@ -956,10 +953,6 @@ bool AppInit2(boost::thread_group& threadGroup)
 
     // ********************************************************* Step 10: load peers
 
-
-    LogPrintf("*** RGP *** APInit2 before InitMessage Debug 3\n" );
-
-
     uiInterface.InitMessage(_("Loading addresses..."));
 
     nStart = GetTimeMillis();
@@ -970,8 +963,7 @@ bool AppInit2(boost::thread_group& threadGroup)
             LogPrintf("Invalid or missing peers.dat; recreating\n");
     }
 
-    LogPrintf("Loaded %i addresses from peers.dat  %dms\n",
-           addrman.size(), GetTimeMillis() - nStart);
+    LogPrintf("Loaded %i addresses from peers.dat  %dms\n", addrman.size(), GetTimeMillis() - nStart);
 
     // ********************************************************* Step 10.1: startup secure messaging
     
@@ -1098,13 +1090,7 @@ bool AppInit2(boost::thread_group& threadGroup)
 
     darkSendPool.InitCollateralAddress();
 
-
-    LogPrintf("*** RGP*** APInit2 CReating thread ThreadCheckDarkSendPool   Debug 4\n" );
-
-
     threadGroup.create_thread(boost::bind(&ThreadCheckDarkSendPool));
-
-
 
     RandAddSeedPerfmon();
 
@@ -1170,8 +1156,6 @@ bool AppInit2(boost::thread_group& threadGroup)
     }
 
 #endif
-
-    LogPrintf("*** RGP*** APInit2 ending... Debug 5\n" );
 
     return !fRequestShutdown;
 }

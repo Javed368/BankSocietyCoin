@@ -737,12 +737,20 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx, bool fLimitFree,
         return error("AcceptToMemoryPool : CheckTransaction failed");
 
     // Coinbase is only valid in a block, not as a loose transaction
-    if (tx.IsCoinBase())
-        return tx.DoS(100, error("AcceptToMemoryPool : coinbase as individual tx"));
+    if (tx.IsCoinBase()){
+        /* RGP, Found some wallet error that exists only on one machine
+                to be investigated later for future fix. */
+        // return tx.DoS(100, error("AcceptToMemoryPool : coinbase as individual tx"));
+        return ( false );
+    }
 
     // ppcoin: coinstake is also only valid in a block, not as a loose transaction
-    if (tx.IsCoinStake())
-        return tx.DoS(100, error("AcceptToMemoryPool : coinstake as individual tx"));
+    if (tx.IsCoinStake()){
+        /* RGP, Found some wallet error that exists only on one machine
+                to be investigated later for future fix. */
+        // return tx.DoS(100, error("AcceptToMemoryPool : coinstake as individual tx"));
+        return ( false );
+    }
 
     // Rather not work on nonstandard transactions (unless -testnet)
     string reason;
@@ -1361,13 +1369,13 @@ static CBigNum GetProofOfStakeLimit(int nHeight)
 }
 
 /* --------------------------------------------------------------------------- 
-   -- RGP, Bank Society Coin Information									--
+   -- RGP, Bank Society Coin Information				    --
    ---------------------------------------------------------------------------
-   -- Premine Phase			: Block 1 to 100			Reward = 200,000	--
-   -- PoW Phase Start		: Block 101 to 50000 		Reward = 5 			--
-   -- PoW Phase  			: Block 50001 to 250000		Reward = 25			--
-   -- PoW Phase				: 250001 to 500000			Reward = 35			--
-   -- PoW ends 500001														--
+   -- Premine Phase	: Block 1 to 100            Reward = 200,000        --
+   -- PoW Phase Start	: Block 101 to 50000        Reward = 5              --
+   -- PoW Phase  	: Block 50001 to 250000     Reward = 25             --
+   -- PoW Phase		: 250001 to 750000          Reward = 35             --
+   -- PoW ends 750001                                                       --
    ---------------------------------------------------------------------------  */
 
 double GetDynamicBlockReward3(int nHeight)
@@ -1430,8 +1438,6 @@ double GetDynamicBlockReward3(int nHeight)
         nSubsidyMod = nNetworkHashPS / nDifficulty;
         nSubsidyBase = nSubsidyMax - nSubsidyMod;
 
-        LogPrintf("*** RGP  GetDynamicBlockReward3 nSubsidyMod %ld nSubsidyBase %ld Hashrate %lf Difficulty %lf \n",nSubsidyMod, nSubsidyBase, nNetworkHashPS, nDifficulty  );
-
         /* Default Range Control for initial mining phases (Mitigates mining-centralization with 100% reward loss) */
         /* ------ Max (Loose) ------ */
         if (nSubsidyMod > nSubsidyMax)
@@ -1444,6 +1450,7 @@ double GetDynamicBlockReward3(int nHeight)
             nSubsidyBase = nSubsidyMin;
         }
 
+        // RGP, Removed TightForkHeight not implemented
         //* Activate strict Range controls after fork height (Mitigates mining-centralization without 100% reward loss) */
         /*if (nHeight > TightForkHeight)
         { */
@@ -1470,8 +1477,8 @@ double GetDynamicBlockReward3(int nHeight)
    -- Premine Phase		: Block 1 to 100        Reward = 200,000    --
    -- PoW Phase Start		: Block 101 to 50000 	Reward = 5          --
    -- PoW Phase  		: Block 50001 to 250000	Reward = 25	    --
-   -- PoW Phase			: 250001 to 500000	Reward = 35         --
-   -- PoW ends 500001                                                       --
+   -- PoW Phase			: 250001 to 750000	Reward = 35         --
+   -- PoW ends 750001                                                       --
    --------------------------------------------------------------------------- */
 
 
@@ -1510,9 +1517,6 @@ int64_t GetProofOfWorkReward(int nHeight, int64_t nFees)
     }
 
     int64_t nSubsidy = nSubsidyBase * COIN;
-
-    LogPrintf("*** RGP GetProofOfWorkReward() : create=%s nSubsidyBase=%d Hashrate=%d Diff=%d\n", FormatMoney(nSubsidy), nSubsidyBase, GetPoWMHashPS(), GetDifficulty());
-    LogPrintf("*** RGP GetProofOfWorkReward() : nFees=%d ", nFees);
 
     return nSubsidy + nFees;
 
@@ -2289,8 +2293,6 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
 
 bool static Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
 {
-    LogPrintf("REORGANIZE\n");
-
     // Find the fork
     CBlockIndex* pfork = pindexBest;
     CBlockIndex* plonger = pindexNew;
@@ -2316,8 +2318,10 @@ bool static Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
         vConnect.push_back(pindex);
     reverse(vConnect.begin(), vConnect.end());
 
-    LogPrintf("REORGANIZE: Disconnect %u blocks; %s..%s\n", vDisconnect.size(), pfork->GetBlockHash().ToString(), pindexBest->GetBlockHash().ToString());
-    LogPrintf("REORGANIZE: Connect %u blocks; %s..%s\n", vConnect.size(), pfork->GetBlockHash().ToString(), pindexNew->GetBlockHash().ToString());
+    if (fDebug){
+        LogPrintf("REORGANIZE: Disconnect %u blocks; %s..%s\n", vDisconnect.size(), pfork->GetBlockHash().ToString(), pindexBest->GetBlockHash().ToString());
+        LogPrintf("REORGANIZE: Connect %u blocks; %s..%s\n", vConnect.size(), pfork->GetBlockHash().ToString(), pindexNew->GetBlockHash().ToString());
+    }
 
     // Disconnect shorter branch
     list<CTransaction> vResurrect;
@@ -2381,8 +2385,6 @@ bool static Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
         mempool.remove(tx);
         mempool.removeConflicts(tx);
     }
-
-    LogPrintf("REORGANIZE: done\n");
 
     return true;
 }
@@ -2465,11 +2467,15 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
             CBlock block;
             if (!block.ReadFromDisk(pindex))
             {
-                LogPrintf("SetBestChain() : ReadFromDisk failed\n");
+                if ( fDebug ){
+                    LogPrintf("SetBestChain() : ReadFromDisk failed\n");
+                }
                 break;
             }
             if (!txdb.TxnBegin()) {
-                LogPrintf("SetBestChain() : TxnBegin 2 failed\n");
+                if ( fDebug ){
+                    LogPrintf("SetBestChain() : TxnBegin 2 failed\n");
+                }
                 break;
             }
             // errors now are not fatal, we still did a reorganisation to a new chain in a valid way
@@ -2497,13 +2503,13 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
 
     uint256 nBestBlockTrust = pindexBest->nHeight != 0 ? (pindexBest->nChainTrust - pindexBest->pprev->nChainTrust) : pindexBest->nChainTrust;
 
-    LogPrintf("SetBestChain: new best=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
-
+    if (fDebug ){
+        LogPrintf("SetBestChain: new best=%s  height=%d  trust=%s  blocktrust=%d  date=%s\n",
       hashBestChain.ToString(), nBestHeight,
       CBigNum(nBestChainTrust).ToString(),
       nBestBlockTrust.Get64(),
       DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()));
-
+    }
     // Check the version of the last 100 blocks to see if we need to upgrade:
     if (!fIsInitialDownload)
     {
@@ -2516,7 +2522,10 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
             pindex = pindex->pprev;
         }
         if (nUpgraded > 0)
-            LogPrintf("SetBestChain: %d of last 100 blocks above version %d\n", nUpgraded, (int)CBlock::CURRENT_VERSION);
+            if ( fDebug ){
+                LogPrintf("SetBestChain: %d of last 100 blocks above version %d\n", nUpgraded, (int)CBlock::CURRENT_VERSION);
+            }
+
         if (nUpgraded > 100/2)
             // strMiscWarning is read by GetWarnings(), called by Qt and the JSON-RPC code to warn the user:
             strMiscWarning = _("Warning: This version is obsolete, upgrade required!");
@@ -2709,8 +2718,9 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
     }
 
 
-
-    // ----------- masternode payments -----------
+    /* -------------------------------------------
+       --          masternode payments          --
+       ------------------------------------------- */
 
     bool MasternodePayments = false;
     bool fIsInitialDownload = IsInitialBlockDownload();
@@ -2761,7 +2771,9 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
                         if(fDebug) { LogPrintf("CheckBlock() : Couldn't find masternode payment(%d|%d) or payee(%d|%s) nHeight %d. \n", foundPaymentAmount, masternodePaymentAmount, foundPayee, address2.ToString().c_str(), pindexBest->nHeight+1); }
                         return DoS(100, error("CheckBlock() : Couldn't find masternode payment or payee"));
                     } else {
-                        LogPrintf("CheckBlock() : Found payment(%d|%d) or payee(%d|%s) nHeight %d. \n", foundPaymentAmount, masternodePaymentAmount, foundPayee, address2.ToString().c_str(), pindexBest->nHeight+1);
+                        if (fDebug){
+                           LogPrintf("CheckBlock() : Found payment(%d|%d) or payee(%d|%s) nHeight %d. \n", foundPaymentAmount, masternodePaymentAmount, foundPayee, address2.ToString().c_str(), pindexBest->nHeight+1);
+                        }
                     }
                 } else {
                     if(fDebug) { LogPrintf("CheckBlock() : Skipping masternode payment check - nHeight %d Hash %s\n", pindexBest->nHeight+1, GetHash().ToString().c_str()); }
@@ -3002,7 +3014,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         if (deltaTime < 0)
         {
             if (pfrom){
-                LogPrintf("*** RGP SPAMMING \n");
+
                 Misbehaving(pfrom->GetId(), 1);
             }
             return error("ProcessBlock() : block with timestamp before last checkpoint");
@@ -3022,7 +3034,9 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     // If we don't already have its previous block, shunt it off to holding area until we get it
     if (!mapBlockIndex.count(pblock->hashPrevBlock))
     {
-        LogPrintf("ProcessBlock: ORPHAN BLOCK %lu, prev=%s\n", (unsigned long)mapOrphanBlocks.size(), pblock->hashPrevBlock.ToString());
+        if ( fDebug ){
+            LogPrintf("ProcessBlock: ORPHAN BLOCK %lu, prev=%s\n", (unsigned long)mapOrphanBlocks.size(), pblock->hashPrevBlock.ToString());
+        }
 
         // Accept orphans as long as there is a node to request its parents from
         if (pfrom) {
@@ -3119,7 +3133,9 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
                     pmn->nLastPaid = GetAdjustedTime();
                 }
 
-                LogPrintf("ProcessBlock() : Update Masternode Last Paid Time - %d\n", pindexBest->nHeight);
+                if ( fDebug ){
+                    LogPrintf("ProcessBlock() : Update Masternode Last Paid Time - %d\n", pindexBest->nHeight);
+                }
             }
 
             masternodePayments.ProcessBlock(GetHeight()+10);
@@ -3127,8 +3143,9 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 
     }
 
-    LogPrintf("ProcessBlock: ACCEPTED\n");
-
+    if ( fDebug ){
+       LogPrintf("ProcessBlock: ACCEPTED\n");
+    }
     return true;
 }
 
@@ -3167,7 +3184,6 @@ bool CBlock::SignBlock(CWallet& wallet, int64_t nFees)
 
         if (wallet.CreateCoinStake(wallet, nBits, nSearchInterval, nFees, txCoinStake, key))
         {
-            LogPrintf("*** RGP SignBlock wallet.CreateCoinStake returned false \n");
 
             if (txCoinStake.nTime >= pindexBest->GetPastTimeLimit()+1)
             {
@@ -3870,7 +3886,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
         pfrom->fSuccessfullyConnected = true;
 
-        LogPrintf("receive version message: version %d, blocks=%d, us=%s, them=%s, peer=%s\n", pfrom->nVersion, pfrom->nStartingHeight, addrMe.ToString(), addrFrom.ToString(), pfrom->addr.ToString());
+        if (fDebug){
+           LogPrintf("receive version message: version %d, blocks=%d, us=%s, them=%s, peer=%s\n", pfrom->nVersion, pfrom->nStartingHeight, addrMe.ToString(), addrFrom.ToString(), pfrom->addr.ToString());
+        }
 
         string ipAddressTest;
         string portInfo;
@@ -3878,15 +3896,15 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         ipAddressTest = addrFrom.ToString();
         portInfo = addrFrom.ToStringPort();
 
-        LogPrintf("*** RGP Port check %s ",portInfo );
+        //LogPrintf("*** RGP Port check %s ",portInfo );
 
         if ( portInfo == "23960" ){
-             LogPrintf("*** RGP SAFE Port check %s ",portInfo );
+             //LogPrintf("*** RGP SAFE Port check %s ",portInfo );
         }
         else{
-                LogPrintf("\n**********************************************************************\n");
-                LogPrintf("*** RGP Bad address %s marked as MIS-behaving!!!          \n ", ipAddressTest );
-                LogPrintf("**********************************************************************\n");
+                //LogPrintf("\n**********************************************************************\n");
+                // LogPrintf("*** RGP Bad address %s marked as MIS-behaving!!!          \n ", ipAddressTest );
+                //LogPrintf("**********************************************************************\n");
                 //Misbehaving(pfrom->GetId(), 100 );
                 return false;
         }
@@ -3902,7 +3920,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
     else if (pfrom->nVersion == 0)
     {
-        LogPrintf("*** RGP No version messages cam efirst \n");
 
         // Must have a version message before anything else
         Misbehaving(pfrom->GetId(), 1);
@@ -3926,7 +3943,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             return true;
         if (vAddr.size() > 1000)
         {
-            LogPrintf("*** RGP Address from older version \n");
             Misbehaving(pfrom->GetId(), 20);
             return error("message addr size() = %u", vAddr.size());
         }
@@ -4042,7 +4058,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         vRecv >> vInv;
         if (vInv.size() > MAX_INV_SZ)
         {
-            LogPrintf("*** RGP vInv.size too big \n");
+
             Misbehaving(pfrom->GetId(), 20);
             return error("message getdata size() = %u", vInv.size());
         }
@@ -4430,8 +4446,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
                 // peer might be an older or different implementation with
                 // a different signature key, etc.
 
-                LogPrintf("*** RGP too many types of messages \n");
-
                 Misbehaving(pfrom->GetId(), 10);
             }
         }
@@ -4465,8 +4479,9 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 // requires LOCK(cs_vRecvMsg)
 bool ProcessMessages(CNode* pfrom)
 {
-    //if (fDebug)
-    //LogPrintf("ProcessMessages(%zu messages)\n", pfrom->vRecvMsg.size());
+    if (fDebug){
+       LogPrintf("ProcessMessages(%zu messages)\n", pfrom->vRecvMsg.size());
+    }
 
     //
     // Message format
@@ -4493,10 +4508,11 @@ bool ProcessMessages(CNode* pfrom)
         // get next message
         CNetMessage& msg = *it;
 
-        //if (fDebug)
-        //    LogPrintf("ProcessMessages(message %u msgsz, %zu bytes, complete:%s)\n",
-        //            msg.hdr.nMessageSize, msg.vRecv.size(),
-        //            msg.complete() ? "Y" : "N");
+        if (fDebug){
+           LogPrintf("ProcessMessages(message %u msgsz, %zu bytes, complete:%s)\n",
+                     msg.hdr.nMessageSize, msg.vRecv.size(),
+                     msg.complete() ? "Y" : "N");
+        }
 
         // end, if an incomplete message is found
         if (!msg.complete())
@@ -4540,11 +4556,8 @@ bool ProcessMessages(CNode* pfrom)
         bool fRet = false;
         try
         {
-            //LogPrintf("*** RGP ProcessMessages, Before ProcessMessage \n");
 
             fRet = ProcessMessage(pfrom, strCommand, vRecv);
-
-            //LogPrintf("*** RGP ProcessMessages, After ProcessMessage \n");
 
             boost::this_thread::interruption_point();
         }
@@ -4553,19 +4566,16 @@ bool ProcessMessages(CNode* pfrom)
             if (strstr(e.what(), "end of data"))
             {
                 // Allow exceptions from under-length message on vRecv
-                LogPrintf("*** RGP ProcessMessages, Exception - END OF DATA \n");
                 LogPrintf("ProcessMessages(%s, %u bytes) : Exception '%s' caught, normally caused by a message being shorter than its stated length\n", strCommand, nMessageSize, e.what());
             }
             else if (strstr(e.what(), "size too large"))
             {
                 // Allow exceptions from over-long size
-                LogPrintf("*** RGP ProcessMessages, Exception - SIZE TOO LARGE \n");
                 LogPrintf("ProcessMessages(%s, %u bytes) : Exception '%s' caught\n", strCommand, nMessageSize, e.what());
             }
             else
             {
 
-                LogPrintf("*** RGP ProcessMessages, Exception - OTHER EXCEPTION \n");
                 PrintExceptionContinue(&e, "ProcessMessages()");
             }
         }
@@ -4573,10 +4583,10 @@ bool ProcessMessages(CNode* pfrom)
             throw;
         }
         catch (std::exception& e) {
-            LogPrintf("*** RGP ProcessMessages, Exception - BOOST Interrupt debug 1 \n");
+
             PrintExceptionContinue(&e, "ProcessMessages()");
         } catch (...) {
-            LogPrintf("*** RGP ProcessMessages, Exception - BOOST Interrupt debug 2 \n");
+
             PrintExceptionContinue(NULL, "ProcessMessages()");
         }
 
@@ -4703,7 +4713,7 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
             if (pto->addr.IsLocal())
                 LogPrintf("Warning: not banning local node %s!\n", pto->addr.ToString().c_str());
             else {
-                LogPrintf("*** RGP SendMessages, banned for misbehaving 1 \n");
+
                 pto->fDisconnect = true;
                 CNode::Ban(pto->addr, BanReasonNodeMisbehaving);
             }

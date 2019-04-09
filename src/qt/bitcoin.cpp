@@ -160,9 +160,9 @@ int main(int argc, char *argv[])
     {
         // This message can not be translated, as translation is not initialized yet
         // (which not yet possible because lang=XX can be overridden in bitcoin.conf in the data directory)
-        /* ------------------------------------------------------------------------       
-		   --RGPickles, Updated for Bank society test on Roaming directory check --
-		   ------------------------------------------------------------------------ */
+        /* ------------------------------------------------------------------------
+           --RGPickles, Updated for Bank society test on Roaming directory check --
+           ------------------------------------------------------------------------ */
         QMessageBox::critical(0, "Bank Society",
                               QString("Error: Specified data directory \"%1\" does not exist.").arg(QString::fromStdString(mapArgs["-datadir"])));
         return 1;
@@ -247,8 +247,9 @@ int main(int argc, char *argv[])
     try
     {
         if (fUseBlackTheme){
-            /* RGP , Caused the wallet to crash - disables for now */
-            //GUIUtil::SetBlackThemeQSS(app);
+            /* RGP , Caused the wallet to crash - disabled for now */
+
+          GUIUtil::SetBlackThemeQSS(app);
         }
 
         // Regenerate startup link, to fix links to old versions
